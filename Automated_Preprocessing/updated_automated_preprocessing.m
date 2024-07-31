@@ -1,7 +1,8 @@
 %% Automatic cleaning and preprocessing
 % This script was developed by Vincent Schmidt.
 % Small adjustements, saving the cleaned data and a 90Hz line noise filter
-% were added by Debora Nolte.  
+% were added by Debora Nolte.
+% Adjustment of the highpass filter and data cleaning by Jessica Simon
 
 %%
 clear all;
@@ -96,9 +97,12 @@ EEG = pop_importevent(EEG, 'event', fullfile(trgpath, strcat('trigger_file_', ui
 % filter the data
 % parameters adapted from Czeszumski, 2023 (Hyperscanning Maastricht)
 low_pass = 128; 
-high_pass = .1;
+high_pass = .5;
 EEG = pop_eegfiltnew(EEG, high_pass, []); % 0.1 is the lower edge
 EEG = pop_eegfiltnew(EEG, [], low_pass); % 100 is the upper edge
+
+% downsample data to 512 Hz
+EEG = pop_resample(EEG, 512);
 
 % remove line noise with zapline
 zaplineConfig=[];
@@ -121,7 +125,7 @@ EEG = pop_loadset(sprintf('1a_triggersFiltering_%s.set',uidname),fullfile(saveda
 full_chanlocs = EEG.chanlocs; % used for data cleaning and interpolation
 
 % From documentation: Use vis_artifacts to compare the cleaned data to the original.
-[EEG,HP,BUR] = clean_artifacts(EEG);
+[EEG,HP,BUR] = clean_artifacts(EEG, 'BurstCriterion', 20, 'BurstRejection', 'on', 'Highpass', 'off');
 
 Zr=find(EEG.etc.clean_sample_mask == 0); % find all rejected elements
 if ~isempty(Zr)
@@ -163,6 +167,7 @@ addpath(fullfile(savedata,'amica'))
 permission_cleanup(savedata);
 outDir = fullfile(savedata, 'amica');
 cd(outDir)
+
 % highpass-filter the data at 2 Hz to not include slow drifts in the ICA
 eeg_tmp = pop_eegfiltnew(EEG, 2, []);   
 dataRank = rank(double(eeg_tmp.data'));
