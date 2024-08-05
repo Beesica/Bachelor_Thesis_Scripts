@@ -6,11 +6,6 @@ clc;
 %% Online code 
 addpath('/MATLAB Drive/EEGLAB');
 addpath("EEGLAB/functions/firfilt-master/firfilt-master/");
-addpath("EEGLAB/functions/zapline-plus-main/zapline-plus-main/")
-addpath("EEGLAB/functions/clean_rawdata/")
-addpath("EEGLAB/plugins/amica/")
-addpath("EEGLAB/plugins/ICLabel1.6/")
-addpath("EEGLAB/plugins/preprocessing_helpers/")
 
 eeglab;
 
@@ -70,22 +65,21 @@ for s = 1:length(subjects)
     end 
     
     %% plot ERPs & difference curve
-    erp = figure;
+    figure;
     
     hold on 
 
     % plot automated data
-    plot(EEG_auto.times, mean(avg_erps), 'Color', [0 0.4470 0.7410 1], 'LineWidth', 2.5, 'DisplayName', 'Automated')
+    plot(EEG_auto.times, mean(avg_erps), 'Color', [0 0.4470 0.7410 1], 'DisplayName', 'Automated')
 
     % plot manual data
-    plot(EEG_manu.times, mean(avg_erps2), 'Color', [0.8500 0.3250 0.0980], 'LineWidth', 2.5, 'DisplayName', 'Manual')
+    plot(EEG_manu.times, mean(avg_erps2), 'Color', [0.8500 0.3250 0.0980], 'DisplayName', 'Manual')
 
     % plot difference curve
-    plot(EEG_auto.times, (mean(avg_erp_autos) - mean(avg_erp_autos2)), 'DisplayName', 'Difference', 'Color', 'k')
+    plot(EEG_auto.times, (mean(avg_erp_autos) - mean(avg_erp_autos2)), '--', 'DisplayName', 'Difference', 'Color', 'k')
     
     % set plot parameter
-    title(['Mean Activation of subject ', char(subjects(s))], [' at PO8, P8, PO7 and P7'], 'FontSize', 14, 'fontweight','bold');
-    xlabel('Time [ms]', 'FontSize', 12);
+    xlabel('Time [ms]');
     ylabel('µV');
     yline(0, 'HandleVisibility','off');
     xline(0, 'HandleVisibility','off')
@@ -94,6 +88,6 @@ for s = 1:length(subjects)
     
     %% save plot
     cd(save)
-    saveas(erp ,sprintf('mean_erp_4_elec_%s.jpg', char(subjects(s))))
+    saveas(gca ,sprintf('mean_erp_4_elec_%s.jpg', char(subjects(s))))
     
 end
