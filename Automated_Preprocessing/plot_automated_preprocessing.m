@@ -3,19 +3,13 @@ clear all;
 close all;
 clc; 
 %% 
-savepath = 'F:/Bachelor Thesis_';
-addpath('F:/Bachelor Thesis_');
-addpath('F:/Bachelor Thesis_/Analysis');
-addpath('F:/Bachelor Thesis_/Matlab/eeglab2024.0');
-addpath('F:/Bachelor Thesis_/Matlab/');
-addpath('F:/Bachelor Thesis_/preprocessed/')
-addpath('F:/Bachelor Thesis_/Debbie/')
+addpath('/MATLAB Drive/EEGLAB');
+addpath("EEGLAB/functions/firfilt-master/firfilt-master/");
 
-% load EEGlab
 eeglab;
 
-basepath = 'F:/Bachelor Thesis_/AA_Jessica/';
-cd(basepath);
+save = '/MATLAB Drive/Images';
+savedata = '/MATLAB Drive/data';
 
 %% 
 uidname = '7d9620d5-bbd8-4c63-ab0b-72a3e0a0137a'; % participant ID
@@ -23,20 +17,16 @@ uidname = '7d9620d5-bbd8-4c63-ab0b-72a3e0a0137a'; % participant ID
 ymin = -8; % minimum of y-axis for ERP plot
 ymax = 10; % maximum of y-axis for ERP plot
 
-% saving path of automated and manually preprocessed data
-mpath = ['F:/Bachelor Thesis_/preprocessed/', uidname, '/'];
-apath = ['F:/Bachelor Thesis_/AA_Jessica/', uidname,'/automated_preproc/'];
-
 %% 
 % file names for automated preprocessing
 files =  {'1a_triggersFiltering_%s', '2a_cleanDataChannels_%s', '2a_cleanDataChannels_woRejection_%s', '3a_ICA_%s', '4a_interpolation_%s'};
 
 % iterate through each of the files
-for step = 1:length(files)
+for step = 5:length(files)
     
     % load the data file
     file = append(files{step}, '.set');
-    EEG = pop_loadset(sprintf(file,uidname), apath);
+    EEG = pop_loadset(sprintf(file, uidname), savedata);
 
     %% face stimuli
     % epoch face stimuli
@@ -97,10 +87,9 @@ for step = 1:length(files)
     plot(EEG_face.times, po8_mean_face, 'DisplayName', forLegend_face)
 
     % set plot specifics
-    title(sprintf('Mean Activation at %s of participant %s', 'Po8', uidname), 'FontSize', 11);
     xlabel('time [ms]');
     ylabel('µV');
-    xticks([-500, -250, 0, 100, 170, 250, 500, 750, 1000, 1500]);
+    xticks([-500, -250, 0, 100, 250, 500, 750, 1000, 1500]);
     xline(0, 'HandleVisibility','off')
     yline(0, 'HandleVisibility','off')
     ylim([ymin ymax])
@@ -118,8 +107,7 @@ for step = 1:length(files)
     legend; % show legend
 
     %% save plot
-    cd([basepath, 'ERPs_for_each_participant/', uidname, '/Step_by_Step/']);
-
+    cd(save)
     % save ERP
     pic = append(files{step}, '.jpg');
     saveas(gca, sprintf(pic, uidname));
@@ -134,7 +122,7 @@ files = {'2_%s_bandpass_resample_deblank', '3_%s_channelrejTriggersXensor', '4_%
 for step = 1:length(files)
     % loading the file
     file = append(files{step}, '.set');
-    EEG = pop_loadset(sprintf(file,uidname), mpath);
+    EEG = pop_loadset(sprintf(file,uidname), savedata);
 
     %% Plot ICAepoched (has different data boundaries)
     if strcmp(files{step}, '5_%s_ICAEpoched')
@@ -197,10 +185,9 @@ for step = 1:length(files)
         plot(EEG_face.times, po8_mean_face, 'DisplayName', forLegend_face)
         
         % set plot specifics
-        title(sprintf('Mean Activation at %s of participant %s', 'Po8', uidname), 'FontSize', 11);
         xlabel('time [ms]');
         ylabel('µV');
-        xticks([-500, -250, 0, 100, 170, 250, 500, 750, 1000, 1500]);
+        xticks([-500, -250, 0, 100, 250, 500, 750, 1000, 1500]);
         xline(0, 'HandleVisibility','off')
         yline(0, 'HandleVisibility','off')
         ylim([ymin ymax])
@@ -276,10 +263,9 @@ for step = 1:length(files)
         plot(EEG_face.times, po8_mean_face, 'DisplayName', forLegend_face)
         
         % set plot specifics
-        title(sprintf('Mean Activation at %s of participant %s', 'Po8', uidname), 'FontSize', 11);
         xlabel('time [ms]');
         ylabel('µV');
-        xticks([-500, -250, 0, 100, 170, 250, 500, 750, 1000, 1500]);
+        xticks([-500, -250, 0, 100, 250, 500, 750, 1000, 1500]);
         xline(0, 'HandleVisibility','off')
         yline(0, 'HandleVisibility','off')
         ylim([ymin ymax])
@@ -298,8 +284,7 @@ for step = 1:length(files)
     end 
 
     %% save plot
-    cd([basepath, 'ERPs_for_each_participant/', uidname, '/Step_by_Step/']);
-
+    cd(save);
     pic = append(files{step}, '.jpg');
     saveas(gca, sprintf(pic, uidname))
 
