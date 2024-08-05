@@ -83,6 +83,7 @@ for s = 1:length(subjects)
     ylabel('µV');
     yline(0, 'HandleVisibility','off');
     xline(0, 'HandleVisibility','off')
+    xticks([-500, -250, 0, 100, 250, 500, 750, 1000, 1500]);
     
     legend() % show legend
     
