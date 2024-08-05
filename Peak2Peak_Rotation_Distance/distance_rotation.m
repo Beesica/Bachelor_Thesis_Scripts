@@ -6,11 +6,6 @@ clc;
 %% Online code 
 addpath('/MATLAB Drive/EEGLAB');
 addpath("EEGLAB/functions/firfilt-master/firfilt-master/");
-addpath("EEGLAB/functions/zapline-plus-main/zapline-plus-main/")
-addpath("EEGLAB/functions/clean_rawdata/")
-addpath("EEGLAB/plugins/amica/")
-addpath("EEGLAB/plugins/ICLabel1.6/")
-addpath("EEGLAB/plugins/preprocessing_helpers/")
 
 eeglab;
 
@@ -29,7 +24,7 @@ currElec = 'PO8';
 
 % arrays to save distance and rotation values
 distance_diff = zeros(8, length(subjects));
-rotation_diff = zeros(114, length(subjects));
+rotation_diff = zeros(44, length(subjects));
 
 %% 
 for s = 1:length(subjects) % for each subject
@@ -78,14 +73,14 @@ for s = 1:length(subjects) % for each subject
     
         % calculate peak difference 
         dif_face = peak2peak(peak_face_elec);
-        distance_diff(d,s) = dif_face; % save peak-to-peak difference
-        
+        distance_diff(d,s) = dif_face; % save peak-to-peak difference      
     end
 
     %% rotation
-    for r = 1:114 % maximum rotation value is 114
+    for r = 1:length(rotation_values) % maximum rotation value is 114
+        current_r = rotation_values(r); % get current rotation value
         % get rows with specific rotation value
-        rows_r = arrayfun(@(x) x.('rotation') == r , event_face);
+        rows_r = arrayfun(@(x) x.('rotation') == current_r , event_face);
     
         peak_face = pop_epoch(EEG, {'face'}, [start ending]); % epoch data
         peak_face = eeg_checkset(peak_face); % intact dataset
@@ -96,39 +91,108 @@ for s = 1:length(subjects) % for each subject
         % calculate peak difference 
         dif_face = peak2peak(peak_face_elec);
         rotation_diff(r,s) = dif_face; % save peak-to-peak difference
-        
     end
 
 end 
+
 %% Distribution plots for rotation and distance
+figure
+
 % rotation
 face = pop_epoch(EEG, {'face'}, [-0.5 1.5]);
 histogram([face.event.rotation]);
-xlabel("Rotation in degrees");
-title("Distribution of Rotation Values for Face Stimuli");
+set(gca, 'FontSize', 16)
+xlabel("Rotation [degree]");
+ylabel("Count")
+xlim([0 120])
 
-saveas(gca , "Rotation Distribution.jpg")
+% save plot
+cd(save)
+saveas(gca , "Rotation_Distribution.jpg")
+
+figure
 
 % distance
 face = pop_epoch(EEG, {'face'}, [-0.5 1.5]);
 histogram([face.event.distance]);
-xlabel("Distance");
-title("Distribution of Distance Values for Face Stimuli");
+set(gca, 'FontSize', 16)
+xlabel("Distance [Unity Units]");
+ylabel("Count")
 
-saveas(gca , "Distance Distribution.jpg")
+% save plot
+cd(save)
+saveas(gca , "Distance_Distribution.jpg")
 
 %% Line plot of distance
-plot(distance_values, distance_diff)
-title('Peak-to-Peak differences with respect to Distance')
-xlabel('Distance')
-ylabel('Peak-to-Peak Difference')
-xlim([0 max(distance_values)+1])
+figure
+
+hold on
+
+distance_diff_mean = mean(distance_diff, 2); % Calculate mean across subjects
+
+p = polyfit(distance_values, distance_diff_mean, 1); % Fit linear function to mean values
+yfit = polyval(p, distance_values); % Evaluate the polynomial
+
+plot(distance_values, distance_diff, 'LineWidth', 1) % plot line plot
+plot(distance_values, yfit, '--', 'Color',['k'], 'LineWidth', 1.5); % Plot the regression line
+
+% set plot specifications
+xlabel('Distance [Unity Units]')
+ylabel('Peak-to-Peak Difference [µV]')
+ylim([0 28])
+
+hold off
+
+% Get handle of the current axis
+ax = gca;
+
+% adjust x-axis label
+xlabelHandle = ax.XLabel;
+xlabelHandle.Position = xlabelHandle.Position + [0, 0, 0]; % Adjust the second value to move further away
+
+% adjust y-axis label
+ylabelHandle = ax.YLabel;
+ylabelHandle.Position = ylabelHandle.Position + [0, 0, 0];
+
+% save plot
+cd(save)
+saveas(gca, 'Distance_peak2peak.jpg')
 
 %% Scatter plot of rotation
-scatter([1:1:114], rotation_diff)
-title('Peak-to-Peak differences with respect to Rotation')
-xlabel('Rotation')
-ylabel('Peak-to-Peak Difference')
-xlim([0 max(rotation_values)+1])
+figure;
 
+hold on; 
 
+rotation_diff_mean = mean(rotation_diff, 2); % Calculate mean across subjects
+
+p = polyfit(rotation_values, rotation_diff_mean, 1); % Fit linear function to mean values
+yfit = polyval(p, rotation_values); % Evaluate the polynomial
+
+% plot scatter plots for all subjects
+for i = 1:9
+    scatter(rotation_values, rotation_diff(:, i), 'filled', 'HandleVisibility', 'off', 'SizeData',10);
+end
+
+plot(rotation_values, yfit, '--', 'Color',['k'], 'LineWidth', 1.5); % Plot the regression line
+
+hold off;
+
+% customize plot
+xlabel('Rotation [degree]')
+ylabel('Peak-to-Peak Difference [µV]')
+xlim([-1 max(rotation_values)+1])
+
+% Get handle of the current axis
+ax = gca;
+
+% adjust x-axis label
+xlabelHandle = ax.XLabel;
+xlabelHandle.Position = xlabelHandle.Position + [0, 0, 0]; % Adjust the second value to move further away
+
+% adjust y-axis label
+ylabelHandle = ax.YLabel;
+ylabelHandle.Position = ylabelHandle.Position + [0, 0, 0];
+
+% save plot
+cd(save)
+saveas(gca, 'Rotation_peak2peak.jpg')
