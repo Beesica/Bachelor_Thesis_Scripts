@@ -6,11 +6,6 @@ clc;
 %% Online code 
 addpath('/MATLAB Drive/EEGLAB');
 addpath("EEGLAB/functions/firfilt-master/firfilt-master/");
-addpath("EEGLAB/functions/zapline-plus-main/zapline-plus-main/")
-addpath("EEGLAB/functions/clean_rawdata/")
-addpath("EEGLAB/plugins/amica/")
-addpath("EEGLAB/plugins/ICLabel1.6/")
-addpath("EEGLAB/plugins/preprocessing_helpers/")
 
 eeglab;
 
@@ -55,7 +50,7 @@ for s = 1:length(subjects) % iterate through subjects
     % calculate difference between 100ms and actual time of P100
     delay = 100 - p100.times(locs(1));
 
-    % plot(p100.times, p100_elec) % plot time window used to calculate time delay
+    % plot(p100.times, p100_elec, 'LineWidth', 2) % plot time window used to calculate time delay
 
     %% calculate peak-to-peak difference
     % adjust for time shift of P100
@@ -92,7 +87,7 @@ for s = 1:length(subjects) % iterate through subjects
     % find peak-to-peak difference for subject for P100 and N170
     dif_object = peak2peak(peak_object_elec);
 
-    % plot(peak_face.times, peak_face_elec) % plot time window used for peak2peak difference
+    % plot(peak_face.times, peak_face_elec, 'LineWidth', 2) % plot time window used for peak2peak difference
 
     %% save difference values
     diff(s,1) = dif_face;
@@ -102,11 +97,42 @@ for s = 1:length(subjects) % iterate through subjects
 end
 
 %% plot boxplots for difference
-difference = array2table(diff, 'VariableNames', {'face', 'body', 'object'}); % transfer array to table to get column headings
+figure;
 
-boxchart(diff) % plot boxplot
+% Initialize colors for each condition
+colors = [0 0.4470 0.7410; % face blue
+          0.9290 0.6940 0.1250; % body yellow
+          0.8500 0.3250 0.0980]; % object red
+
+% Plot each condition with a different color
+hold on;
+
+% create boxplot 
+for i = 1:size(diff, 2)
+    boxchart(ones(size(diff, 1), 1) * i, diff(:, i), 'BoxFaceColor', colors(i, :));
+end
+
+hold off;
 
 % set plot parameters
+xticks(1:3); % Set the x-axis ticks to match the number of conditions
 xticklabels({'face', 'body', 'object'})
-ylabel('Peak-to-Peak Difference')
-title('Peak-to-Peak Difference between Categories')
+ylabel('Peak-to-Peak Difference [µV]')
+xlabel('Condition')
+
+ax = gca;
+
+% adjust x-axis label
+xlabelHandle = ax.XLabel;
+xlabelHandle.Position = xlabelHandle.Position + [0, 0, 0]; 
+
+% adjust y-axis label 
+ylabelHandle = ax.YLabel;
+ylabelHandle.Position = ylabelHandle.Position + [0, 0, 0];
+
+cd(save)
+% save boxplot
+saveas(gca, 'peak2peak_difference_categories.jpg')
+
+% save peak-to-peak difference data
+writematrix(diff,'diff.csv') 
