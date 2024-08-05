@@ -6,15 +6,11 @@ clc;
 %% Online code 
 addpath('/MATLAB Drive/EEGLAB');
 addpath("EEGLAB/functions/firfilt-master/firfilt-master/");
-addpath("EEGLAB/functions/zapline-plus-main/zapline-plus-main/")
-addpath("EEGLAB/functions/clean_rawdata/")
-addpath("EEGLAB/plugins/amica/")
-addpath("EEGLAB/plugins/ICLabel1.6/")
-addpath("EEGLAB/plugins/preprocessing_helpers/")
 
 eeglab;
 
-savedata = '/MATLAB Drive';
+savedata = '/MATLAB Drive/data'; % location of data
+save = '/MATLAB Drive/Images'; % saving path
 
 %% set parameters
 % included participants 
@@ -24,7 +20,7 @@ subjects = {'02c5e2dc-2cd8-4d48-9d4e-16d55a8fe6d2'; '6a23f1a0-bdeb-4afd-af1c-cd7
     'a9412d68-6eaf-4a1f-ab61-b2f408ac5b47'; 'dfb99d79-4595-4a0d-b346-23282e000f10'};
 
 % electrode to be plotted
-currElec = 'P8';
+currElec = 'PO7';
 
 %% set up arrays for saving
 % use 358 for epoch [-0.2 0.5] and 1024 for epoch [-0.5 1.5]
@@ -100,7 +96,6 @@ end
 subjectsCount = string(numel(subjects)); % amount of subjects
 
 figure;
-subplot(2,1,1) % 2 rows, 1 column of plots
 
 hold on 
 
@@ -109,35 +104,36 @@ plot(EEG_all.times, mean(avg_erps), 'Color', [0 0.4470 0.7410 1], 'LineWidth', 2
 plot(EEG_all.times, avg_erps, 'Color', [0 0.4470 0.7410 0.2], 'LineWidth', 1, 'DisplayName', 'Avg') % average of every subject 
 
 % set plot parameter
-title(sprintf('Mean Activation for ' + subjectsCount + ' subjects at %s',currElec), 'FontSize', 14);
 xlabel('Time [ms]');
 ylabel('µV');
-xticks([-500, -250, 0, 100, 170, 250, 500, 750, 1000, 1500]);
+xticks([-500, -250, 0, 100, 250, 500, 750, 1000, 1500]);
+
 xline(0, 'HandleVisibility','off')
 yline(0, 'HandleVisibility','off')
 
 hold off
 
-legend % show legend
+legend('Mean', 'Average') % show legend
 
-saveas(gca, sprintf('average_erp_epoch_0.5_1.5_%s.jpg', char(subjects(s))))
+% save plot
+cd(save)
+saveas(gca, sprintf('grand_average_erp_%s.jpg', currElec))
 
-%% plots single conditions 
-figure 
-subplot(2,1,2)
+%%
+% plots single conditions 
+figure
 
-hold on;
+hold on
 
 % plot average ERP for face, body, and object stimuli
-plot(EEG_all.times, mean(erps_face),'Color', [0 0.4470 0.7410], 'LineWidth', 1.5, 'DisplayName', 'Face')
-plot(EEG_all.times, mean(erps_body), 'Color', [0.8500 0.3250 0.0980], 'LineWidth', 1.5,'DisplayName', 'Body')
-plot(EEG_all.times, mean(erps_object), 'Color', [0.9290 0.6940 0.1250], 'LineWidth', 1.5, 'DisplayName', 'Object')
+plot(EEG_all.times, mean(erps_face),'Color', [0 0.4470 0.7410], 'DisplayName', 'Face')
+plot(EEG_all.times, mean(erps_body), 'Color', [0.8500 0.3250 0.0980], 'DisplayName', 'Body')
+plot(EEG_all.times, mean(erps_object), 'Color', [0.9290 0.6940 0.1250], 'DisplayName', 'Object')
 
 % set plot parameters
-title(sprintf('Mean Activation per category for ' + subjectsCount + ' subjects at %s',currElec), 'FontSize', 14);
 xlabel('Time [ms]');
 ylabel('µV');
-xticks([-500, -250, 0, 100, 170, 250, 500, 750, 1000, 1500]);
+xticks([-500, -250, 0, 100, 250, 500, 750, 1000, 1500]);
 xline(0, 'HandleVisibility','off')
 yline(0, 'HandleVisibility','off')
 
@@ -145,5 +141,5 @@ hold off
 
 legend; % show legend
 
-%% save the plot
-saveas(gca, sprintf('average_erp_all_conditions_epoch_0.5_1.5_%s.jpg', char(subjects(s))))
+% save average erp
+saveas(gca, sprintf('grand_average_erp_%s_conditions.jpg', currElec))
