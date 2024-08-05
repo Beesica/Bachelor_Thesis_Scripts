@@ -37,37 +37,37 @@ subj_time_face = zeros(length(electrodes),1024);
 subj_time_body = zeros(length(electrodes),1024);
 subj_time_object = zeros(length(electrodes),1024);
 
+%% load dataset for participant
+EEG = pop_loadset(sprintf('4a_interpolation_%s.set', char(subjects(s))),fullfile(savedata));
+EEG = eeg_checkset(EEG); % dataset intact
+
+%% epoch the data
+EEG_all = pop_epoch(EEG, {}, [-0.5 1.5]);
+forLedgend_all = 'all trials'; % label for plot
+EEG_all = eeg_checkset(EEG_all); % dataset intact
+EEG_all_data = EEG_all.data(:,:,:); % save EEG data separately
+
+%% Face stimuli
+EEG_face = pop_epoch(EEG, {'face'}, [-0.5 1.5]); % epoch data
+forLedgend_face = 'face trials'; % label for plot 
+EEG_face = eeg_checkset(EEG_face); % dataset intact
+EEG_face_data = EEG_face.data(:,:,:); % save EEG data separately
+
+%% body stimuli
+EEG_body = pop_epoch(EEG, {'body'}, [-0.5 1.5]); % epoch data
+forLedgend_body = 'body trials';  % label for plot
+EEG_body = eeg_checkset(EEG_body); % dataset intact
+EEG_body_data = EEG_body.data(:,:,:); % EEG data saved separately
+
+%% object stimuli
+EEG_object = pop_epoch(EEG, {'object'}, [-0.5 1.5]); % epoch data
+forLedgend_object = 'object trials'; % legend for plot
+EEG_object = eeg_checkset(EEG_object); % intact dataset
+EEG_object_data = EEG_object.data(:,:,:); % EEG data saved separately
+
 % get erps for each of the electrodes for one subject
 for e = 1:length(electrodes)
-    % load dataset for participant
-    EEG = pop_loadset(sprintf('4a_interpolation_%s.set', char(subjects(s))),fullfile(savedata));
-    EEG = eeg_checkset(EEG); % dataset intact
-
-    %% epoch the data
-    EEG_all = pop_epoch(EEG, {}, [-0.5 1.5]);
-    forLedgend_all = 'all trials'; % label for plot
-    EEG_all = eeg_checkset(EEG_all); % dataset intact
-    EEG_all_data = EEG_all.data(:,:,:); % save EEG data separately
-
-    %% Face stimuli
-    EEG_face = pop_epoch(EEG, {'face'}, [-0.5 1.5]); % epoch data
-    forLedgend_face = 'face trials'; % label for plot 
-    EEG_face = eeg_checkset(EEG_face); % dataset intact
-    EEG_face_data = EEG_face.data(:,:,:); % save EEG data separately
-
-    %% body stimuli
-    EEG_body = pop_epoch(EEG, {'body'}, [-0.5 1.5]); % epoch data
-    forLedgend_body = 'body trials';  % label for plot
-    EEG_body = eeg_checkset(EEG_body); % dataset intact
-    EEG_body_data = EEG_body.data(:,:,:); % EEG data saved separately
-
-    %% object stimuli
-    EEG_object = pop_epoch(EEG, {'object'}, [-0.5 1.5]); % epoch data
-    forLedgend_object = 'object trials'; % legend for plot
-    EEG_object = eeg_checkset(EEG_object); % intact dataset
-    EEG_object_data = EEG_object.data(:,:,:); % EEG data saved separately
-
-    %% Select electrode
+    % Select electrode
     el_idx = find(strcmp({EEG_all.chanlocs.labels}, electrodes(e)) == 1); % find position of electrode
 
     %% calculate means at electrode
