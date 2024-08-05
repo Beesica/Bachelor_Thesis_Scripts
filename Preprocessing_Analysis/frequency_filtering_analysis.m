@@ -12,26 +12,25 @@ eeglab;
 
 uidname = '02c5e2dc-2cd8-4d48-9d4e-16d55a8fe6d2';
 savedata = '/MATLAB Drive/data';
+save = '/MATLAB Drive/Images';
+currElec = 'PO8';
+
+% set filters
+high_pass = 0.5;
+low_pass = 128;
 
 %% 
 % load raw data
 EEG = pop_loadset(sprintf(['0a_rawChanNames_%s.set'],uidname), savedata);
 
 % import trigger files
-trgpath = '/MATLAB Drive/data';
-EEG = pop_importevent(EEG, 'event', fullfile(trgpath, strcat('trigger_file_', uidname, '.csv')), 'fields', {'latency', 'type', 'valid', 'rotation','distance','block'}, 'skipline', 1);
+EEG = pop_importevent(EEG, 'event', fullfile(savedata, strcat('trigger_file_', uidname, '.csv')), 'fields', {'latency', 'type', 'valid', 'rotation','distance','block'}, 'skipline', 1);
 
 %% high pass & low pass filter
-% 0.1 Hz high pass filter
-% high_pass = .1;
-% EEG_high = pop_eegfiltnew(EEG, high_pass, []); % 0.1 is the lower edge
-
-% 0.5 Hz high pass filter
-high_pass = .5;
-EEG_high = pop_eegfiltnew(EEG, high_pass, []); % 0.5 is the lower edge
+% apply high pass filter
+EEG_high = pop_eegfiltnew(EEG, high_pass, []); % 0.5 is the lower edge 
 
 % parameters adapted from Czeszumski, 2023 (Hyperscanning Maastricht) 
-low_pass = 128;
 EEG_high_low = pop_eegfiltnew(EEG_high, [], low_pass); % 128 is the upper edge
 
 % downsample to 512 Hz
@@ -61,7 +60,7 @@ EEG_face_data = EEG_face.data(:,:,:);
 EEG_face.mean = mean(EEG_face_data, 3);
 
 % find index of PO8 electrode
-po8_idx = find(strcmp({EEG_face.chanlocs.labels}, 'PO8') == 1);
+po8_idx = find(strcmp({EEG_face.chanlocs.labels}, currElec) == 1);
 
 % get mean for electrode PO8
 po8_mean_face = EEG_face.mean(po8_idx, :);
@@ -79,7 +78,7 @@ EEG_object_data = EEG_object.data(:,:,:);
 EEG_object.mean = mean(EEG_object_data, 3);
 
 % find index of PO8 electrode
-po8_idx = find(strcmp({EEG_object.chanlocs.labels}, 'PO8') == 1);
+po8_idx = find(strcmp({EEG_object.chanlocs.labels}, currElec) == 1);
 
 % get mean for electrode PO8
 po8_mean_object = EEG_object.mean(po8_idx, :);
@@ -97,7 +96,7 @@ EEG_body_data = EEG_body.data(:,:,:);
 EEG_body.mean = mean(EEG_body_data, 3);
 
 % find index of PO8 electrode
-po8_idx = find(strcmp({EEG_body.chanlocs.labels}, 'PO8') == 1);
+po8_idx = find(strcmp({EEG_body.chanlocs.labels}, currElec) == 1);
 
 % get mean of data for electrode PO8
 po8_mean_body = EEG_body.mean(po8_idx, :);
@@ -107,13 +106,11 @@ po8_mean_body = EEG_body.mean(po8_idx, :);
 plot(EEG_face.times, po8_mean_face, 'DisplayName', forLegend_face)
 
 % set plot specifics
-title(sprintf('Mean Activation at %s of participant %s', 'Po8', uidname), 'FontSize', 11);
 xlabel('time [ms]');
 ylabel('µV');
-xticks([-500, -250, 0, 100, 170, 250, 500, 750, 1000, 1500]);
+xticks([-500, -250, 0, 100, 250, 500, 750, 1000, 1500]);
 xline(0, 'HandleVisibility','off')
 yline(0, 'HandleVisibility','off')
-ylim([-20 15])
 
 hold on
 
@@ -127,5 +124,6 @@ hold off
 
 legend; % show legend
 
-%% save ERP 
-saveas(gca, sprintf('erp_highpass_05_lowpass_zapline_%s.jpg', uidname))
+%% save ERP
+cd(save)
+saveas(gca, sprintf('erp_highpass_%d_lowpass_zapline_%s.jpg', high_pass, uidname))
