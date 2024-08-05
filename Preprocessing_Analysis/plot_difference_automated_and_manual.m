@@ -7,14 +7,9 @@ clc;
 addpath('/MATLAB Drive/EEGLAB');
 addpath('/MATLAB Drive/Scripts');
 addpath("EEGLAB/functions/firfilt-master/firfilt-master/");
-addpath("EEGLAB/functions/zapline-plus-main/zapline-plus-main/")
-addpath("EEGLAB/functions/clean_rawdata/")
-addpath("EEGLAB/plugins/amica/")
-addpath("EEGLAB/plugins/ICLabel1.6/")
-addpath("EEGLAB/plugins/preprocessing_helpers/")
 
 savedata = '/MATLAB Drive/data'; % location for automated preprocessed files 
-save = '/MATLAB Drive'; % location for manually preprocessed files
+save = '/MATLAB Drive/Images'; % location for manually preprocessed files
 
 eeglab;
 
@@ -69,30 +64,28 @@ for s = 1:length(subjects)
     %% plot ERP for manual and automated data & difference curve
    
     % plot automated data
-    plot(EEG_auto.times, elec_mean_auto, 'DisplayName', 'Automated', 'LineWidth', 2)
+    plot(EEG_auto.times, elec_mean_auto, 'DisplayName', 'Automated')
 
     % set plot specifics
-    title(sprintf('Mean Activation at %s of participant %s', curElec, char(subjects(s))), 'FontSize', 11);
     xlabel('time [ms]');
-    xticks([-500, -250, 0, 100, 170, 250, 500, 750, 1000, 1500]);
+    xticks([-500, -250, 0, 100, 250, 500, 750, 1000, 1500]);
     xline(0, 'HandleVisibility','off')
     ylabel('µV');
     yline(0, 'HandleVisibility','off')
-    
 
     hold on
     % plot manual data
-    plot(EEG_manu.times, elec_mean_manu, 'DisplayName', 'Manual', 'LineWidth', 2)
+    plot(EEG_manu.times, elec_mean_manu, 'DisplayName', 'Manual')
 
     % plot difference curve
-    plot(EEG_manu.times, (elec_mean_auto - elec_mean_manu), 'DisplayName', 'Difference', 'Color', 'k')
+    plot(EEG_manu.times, (elec_mean_auto - elec_mean_manu), '--', 'DisplayName', 'Difference', 'Color', 'k')
 
     hold off
 
     legend; % display legend
     
     %% save plot
+    cd(save)
     saveas(gca, sprintf('Difference_%s_%s.jpg', curElec, char(subjects(s))))
 
 end
-
