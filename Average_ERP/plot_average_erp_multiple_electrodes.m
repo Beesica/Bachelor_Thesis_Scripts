@@ -6,14 +6,10 @@ clc;
 %% Online code 
 addpath('/MATLAB Drive/EEGLAB');
 addpath("EEGLAB/functions/firfilt-master/firfilt-master/");
-addpath("EEGLAB/functions/zapline-plus-main/zapline-plus-main/")
-addpath("EEGLAB/functions/clean_rawdata/")
-addpath("EEGLAB/plugins/amica/")
-addpath("EEGLAB/plugins/ICLabel1.6/")
-addpath("EEGLAB/plugins/preprocessing_helpers/")
 
 eeglab;
 
+save = '/MATLAB Drive/Images';
 savedata = '/MATLAB Drive/data';
 
 %% set parameters
@@ -72,29 +68,29 @@ for e = 1:length(electrodes)
     EEG_object_data = EEG_object.data(:,:,:); % EEG data saved separately
 
     %% Select electrode
-    el_idx = find(strcmp({EEG_all.chanlocs.labels}, currElec) == 1); % find position of electrode
+    el_idx = find(strcmp({EEG_all.chanlocs.labels}, electrodes(e)) == 1); % find position of electrode
 
     %% calculate means at electrode
     EEG_all.mean = mean(EEG_all_data, 3);
-    avg_erps(s,:) = EEG_all.mean(el_idx, :);
+    avg_erps(e,:) = EEG_all.mean(el_idx, :);
 
     % face stimuli
     EEG_face.mean = mean(EEG_face_data, 3);
-    erps_face(s,:) = EEG_face.mean(el_idx, :);
+    erps_face(e,:) = EEG_face.mean(el_idx, :);
 
     % body stimuli
     EEG_body.mean = mean(EEG_body_data, 3);
-    erps_body(s,:) = EEG_body.mean(el_idx, :);
+    erps_body(e,:) = EEG_body.mean(el_idx, :);
 
     % object stimuli
     EEG_object.mean = mean(EEG_object_data, 3);
-    erps_object(s,:) = EEG_object.mean(el_idx, :);
+    erps_object(e,:) = EEG_object.mean(el_idx, :);
 
     %% save EEG times to compare it across subjects (should be same)
-    subj_time_all(s,:) = EEG_all.times;
-    subj_time_face(s,:) = EEG_face.times;
-    subj_time_body(s,:) = EEG_body.times;
-    subj_time_object(s,:) = EEG_object.times;
+    subj_time_all(e,:) = EEG_all.times;
+    subj_time_face(e,:) = EEG_face.times;
+    subj_time_body(e,:) = EEG_body.times;
+    subj_time_object(e,:) = EEG_object.times;
 
 end 
 
@@ -102,7 +98,6 @@ end
 subjectsCount = string(numel(subjects)); % amount of subjects
 
 figure;
-subplot(2,1,1) % 2 rows, 1 column of plots
 
 hold on 
 
@@ -111,35 +106,33 @@ plot(EEG_all.times, mean(avg_erps), 'Color', [0 0.4470 0.7410 1], 'LineWidth', 2
 plot(EEG_all.times, avg_erps, 'Color', [0 0.4470 0.7410 0.2], 'LineWidth', 1, 'DisplayName', 'Avg') % average of every subject
 
 % set plot parameter
-title(sprintf('Mean Activation for ' + subjectsCount + ' subjects at %s', char(electrodes(e))), 'FontSize', 14);
 xlabel('Time [ms]');
 ylabel('µV');
-xticks([-500, -250, 0, 100, 170, 250, 500, 750, 1000, 1500]);
+xticks([-500, -250, 0, 100, 250, 500, 750, 1000, 1500]);
 xline(0, 'HandleVisibility','off')
 yline(0, 'HandleVisibility','off')
 
 hold off
 
-legend % show legend
+legend('Mean', 'Average') % show legend
 
-saveas(gca, sprintf('average_erp_4_electrodes_epoch_0.5_1.5_%s.jpg', char(subjects(s))))
+cd(save)
+saveas(gca, sprintf('average_erp_4_electrodes_%s.jpg', char(subjects(s))))
 
 %% plot average ERP for each condition
 figure 
-subplot(2,1,2)
 
 hold on;
 
 % plot average ERP for face, body, and object stimuli
-plot(EEG_all.times, mean(erps_face),'Color', [0 0.4470 0.7410], 'LineWidth', 1.5, 'DisplayName', 'Face')
-plot(EEG_all.times, mean(erps_body), 'Color', [0.8500 0.3250 0.0980], 'LineWidth', 1.5,'DisplayName', 'Body')
-plot(EEG_all.times, mean(erps_object), 'Color', [0.9290 0.6940 0.1250], 'LineWidth', 1.5, 'DisplayName', 'Object')
+plot(EEG_all.times, mean(erps_face),'Color', [0 0.4470 0.7410], 'DisplayName', 'Face')
+plot(EEG_all.times, mean(erps_body), 'Color', [0.8500 0.3250 0.0980], 'DisplayName', 'Body')
+plot(EEG_all.times, mean(erps_object), 'Color', [0.9290 0.6940 0.1250], 'DisplayName', 'Object')
 
 % set plot parameters
-title(sprintf('Mean Activation per category for ' + subjectsCount + ' subjects at %s', char(electrodes(e))), 'FontSize', 14);
 xlabel('Time [ms]');
 ylabel('µV');
-xticks([-500, -250, 0, 100, 170, 250, 500, 750, 1000, 1500]);
+xticks([-500, -250, 0, 100, 250, 500, 750, 1000, 1500]);
 xline(0, 'HandleVisibility','off')
 yline(0, 'HandleVisibility','off')
 
@@ -147,5 +140,6 @@ hold off
 
 legend; % show legend
 
-%% save the plot
-saveas(gca, sprintf('average_erp_all_conditions_epoch_0.5_1.5_%s.jpg', char(subjects(s))))
+% save the plot
+cd(save)
+saveas(gca, sprintf('average_erp_all_conditions_%s.jpg', char(subjects(s))))
