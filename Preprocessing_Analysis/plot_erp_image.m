@@ -6,15 +6,11 @@ clc;
 %% Online code 
 addpath('/MATLAB Drive/EEGLAB');
 addpath("EEGLAB/functions/firfilt-master/firfilt-master/");
-addpath("EEGLAB/functions/zapline-plus-main/zapline-plus-main/")
-addpath("EEGLAB/functions/clean_rawdata/")
-addpath("EEGLAB/plugins/amica/")
-addpath("EEGLAB/plugins/ICLabel1.6/")
-addpath("EEGLAB/plugins/preprocessing_helpers/")
 
 eeglab;
 
 savedata = '/MATLAB Drive/data';
+save = '/MATLAB Drive/Images';
 
 %% 
 % included participants 
@@ -37,9 +33,9 @@ for s = 1:length(subjects)
 
     %% plot ERP image
     erp = figure;
-    erpimage( mean(EEG.data([64], :),1), ones(1, EEG.trials)*EEG.xmax*1000, linspace(EEG.xmin*1000, EEG.xmax*1000, EEG.pnts), sprintf('ERP image at PO8 of Participant %s', char(subjects(s))), 10, 1 ,'yerplabel','\muV','erp','on','cbar','on','topo', { [64] EEG.chanlocs EEG.chaninfo } );
+    erpimage(mean(EEG.data([64], :),1), ones(1, EEG.trials)*EEG.xmax*1000, linspace(EEG.xmin*1000, EEG.xmax*1000, EEG.pnts), 'PO8', 10, 1 ,'yerplabel','\muV','erp','on','cbar','on','topo', { [64] EEG.chanlocs EEG.chaninfo } );
 
     %% save ERP image
+    cd(save)
     saveas(erp ,sprintf('erpimage_%s.jpg', char(subjects(s))),'jpg')
 end 
-
